@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("maven-publish")
     id("signing")
+    id("com.vanniktech.maven.publish") version "0.28.0" apply false
+    id("com.gradleup.nmcp") version "0.0.7" apply false
 }
 
 group = "com.absolution.carousel_compose"
@@ -60,15 +62,57 @@ publishing {
             afterEvaluate {
                 from(components["release"])
             }
+
+            pom {
+                name.set("Carousel Compose")
+                description.set("A Jetpack Compose image carousel.")
+                url.set("https://github.com/abdullahabd15/carousel-compose")
+
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("abdullahabd15")
+                        name.set("Abdullah")
+                        email.set("abdullahabd915@gmail.com")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:git://github.com/abdullahabd15/carousel-compose.git")
+                    developerConnection.set("scm:git:ssh://github.com/abdullahabd15/carousel-compose.git")
+                    url.set("https://github.com/abdullahabd15/carousel-compose")
+                }
+            }
         }
     }
 
     repositories {
         maven {
-            name = "carousel-compose"
+            name = "carouselcompose"
             url = uri(layout.buildDirectory.dir("repo"))
         }
     }
+}
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications["release"])
+}
+
+tasks.register<Zip>("generateRepo") {
+    val publishTask = tasks.named(
+        "publishReleasePublicationToCarouselcomposeRepository",
+        PublishToMavenRepository::class.java
+    )
+    from(publishTask.map { it.repository.url })
+    into("mylibrary")
+    archiveFileName.set("mylibrary.zip")
 }
 
 dependencies {
